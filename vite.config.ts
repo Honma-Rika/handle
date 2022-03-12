@@ -73,4 +73,20 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('locale'))
+            return 'locale'
+          if (id.includes('idioms.txt'))
+            return 'idioms'
+          if (id.includes('polyphones.json'))
+            return 'polyphones'
+          if (id.includes('node_modules') && !id.endsWith('.css'))
+            return 'vendor'
+        },
+      },
+    },
+  },
 })

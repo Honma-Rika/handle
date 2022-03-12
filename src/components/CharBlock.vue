@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import ToneSymbol from './ToneSymbol.vue'
 import type { MatchResult, MatchType, ParsedChar } from '~/logic/types'
-import { checkAssist, inputMode } from '~/storage'
+import { inputMode, useCheckAssist } from '~/storage'
 import { getSymbolState, useMask, useNumberTone } from '~/state'
 
 const props = defineProps<{
@@ -10,16 +9,12 @@ const props = defineProps<{
   active?: boolean
 }>()
 
-const PINYIN_CHAR_WIDTH = 10.2
-const PINYIN_CHAR_GAP = 2.3
-const PINYIN_CHAR_INIT = 1
-
 const exact = computed(() => props.answer && Object.values(props.answer).every(i => i === 'exact'))
 
 const parsed = computed(() => {
   if (props.answer)
     return props.answer
-  if (!props.char || !checkAssist.value || !props.active)
+  if (!props.char || !useCheckAssist.value || !props.active)
     return
 
   // Assist coloring
@@ -42,7 +37,7 @@ function getColor(result?: MatchType, isChar = false) {
   const colors = {
     exact: 'text-ok',
     misplaced: 'text-mis',
-    none: isChar ? 'op80' : 'op40',
+    none: isChar ? 'op80' : 'op35',
     deleted: inputMode.value === 'zy' ? 'op30' : 'line-through op30',
   }
   return `${pre} ${colors[result]}`
@@ -57,7 +52,7 @@ const blockColor = computed(() => {
 })
 
 const toneCharLocation = computed(() => {
-  const part = props.char?.yin || ''
+  const part = props.char?._2 || ''
   return [
     part.lastIndexOf('iu') > -1 ? part.lastIndexOf('iu') + 1 : -1,
     part.lastIndexOf('a'),
@@ -69,24 +64,16 @@ const toneCharLocation = computed(() => {
   ].find(i => i !== null && i >= 0) || 0
 })
 
-const toneCharLeft = computed(() => {
-  const char = props.char
-  if (!char)
-    return 0
-  let gaps = 0
-  if (char._2 && toneCharLocation.value >= char._1.length + char._2.length)
-    gaps = 2
-  else if (toneCharLocation.value >= char._1.length)
-    gaps = 1
-  return PINYIN_CHAR_INIT + toneCharLocation.value * PINYIN_CHAR_WIDTH + gaps * PINYIN_CHAR_GAP
+const vLocation = computed(() => {
+  const part = props.char?._2 || ''
+  return part.lastIndexOf('v')
 })
 
 const partTwo = computed(() => {
-  const two = props.char?._2 || ''
-  const oneLength = props.char?._1?.length || 0
-  const index = toneCharLocation.value - oneLength
+  const two = (props.char?._2 || '')
+  const index = toneCharLocation.value
   // replace i with dot less for tone symbol
-  if (!useNumberTone.value && props.char?.yin[toneCharLocation.value] === 'i')
+  if (!useNumberTone.value && two[index] === 'i')
     return `${two.slice(0, index)}ı${two.slice(index + 1)}`
   return two
 })
@@ -103,8 +90,8 @@ const partTwo = computed(() => {
         >
           {{ char.char }}
         </div>
-        <div absolute text-center top-0 bottom-0 right="2.5" w-5 flex items-center>
-          <div flex="~ center" text-xs style="writing-mode: vertical-rl;">
+        <div absolute text-center top-0 bottom-0 right="2.5" w="5" flex items-center>
+          <div flex="~ center" text-xs style="writing-mode: vertical-rl">
             <span v-if="char._1" :class="getColor(parsed?._1)">
               {{ char._1 }}
             </span>
@@ -115,7 +102,7 @@ const partTwo = computed(() => {
               {{ char._3 }}
             </span>
           </div>
-          <ToneSymbol :tone="char.tone" :class="getColor(parsed?.tone)" mt--1 />
+          <ToneSymbol :tone="char.tone" :class="getColor(parsed?.tone)" mt--1 min-w-6px />
         </div>
       </template>
 
@@ -136,11 +123,30 @@ const partTwo = computed(() => {
             <div v-if="char._1" :class="getColor(parsed?._1)" mx-1px>
               {{ char._1 }}
             </div>
-            <div v-if="partTwo" :class="getColor(parsed?._2)" mx-1px>
-              {{ partTwo }}
-            </div>
-            <div v-if="char._3" :class="getColor(parsed?._3)" mx-1px>
-              {{ char._3 }}
+            <div v-if="partTwo" mx-1px flex>
+              <div v-for="w,idx of partTwo" :key="idx" relative>
+                <div :class="getColor(parsed?._2)">
+                  {{ w.replace('v', 'u') }}
+                </div>
+                <VDots
+                  v-if="!useMask && idx === vLocation"
+                  :class="getColor(parsed?._2)"
+                  absolute w="87%" left="8%" bottom="0.76rem"
+                />
+                <ToneSymbol
+                  v-if="!useNumberTone && idx === toneCharLocation"
+                  :tone="char.tone"
+                  :class="getColor(parsed?.tone)"
+                  absolute w="86%" left="8%"
+                  :style="{
+                    bottom: useMask
+                      ? '1.25rem'
+                      : w === 'v'
+                        ? '0.85rem'
+                        : '0.78rem',
+                  }"
+                />
+              </div>
             </div>
             <div
               v-if="useNumberTone"
@@ -149,17 +155,6 @@ const partTwo = computed(() => {
             >
               {{ char.tone }}
             </div>
-            <ToneSymbol
-              v-else
-              :tone="char.tone"
-              :class="getColor(parsed?.tone)"
-              absolute
-              :style="{
-                left: toneCharLeft + 'px',
-                top: useMask ? '-8px' : '-1.2px'
-              }"
-              mt--1
-            />
           </div>
         </div>
       </template>

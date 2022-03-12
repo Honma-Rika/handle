@@ -1,10 +1,8 @@
 import seedrandom from 'seedrandom'
-import Pinyin from 'pinyin'
-import IDIOMS from '../data/idioms.json'
-import type { MatchResult, ParsedChar } from './types'
+import type { InputMode, MatchResult, ParsedChar } from './types'
 import { pinyin2zhuyin, pinyinInitials, toSimplified } from './lang'
 import { toShuangpin } from './lang/shuangpin'
-import type { InputMode } from '.'
+import { getPinyin } from './idioms'
 
 export function parsePinyin(pinyin: string, mode: InputMode = 'py') {
   let parts: string[] = []
@@ -34,7 +32,14 @@ export function parseChar(char: string, pinyin?: string, mode?: InputMode): Pars
     pinyin = pinyin.slice(0, -tone.length).trim()
 
   const parts = parsePinyin(pinyin, mode)
+  // if there is no final, actually it's no intital
+  if (parts[0] && !parts[1]) {
+    parts[1] = parts[0]
+    parts[0] = ''
+  }
+
   const [one, two, three] = parts
+
   return {
     char,
     _1: one,
@@ -119,14 +124,6 @@ export function checkPass(result: MatchResult[]) {
 
 export function getHint(word: string) {
   return word[Math.floor(seedrandom(word)() * word.length)]
-}
-
-export function getPinyin(word: string) {
-  const simplifiedWord = toSimplified(word)
-  const data = IDIOMS.find(d => d[0] === simplifiedWord || d[0] === word)
-  if (data && data[1])
-    return data[1].split(/\s+/g)
-  return Pinyin(simplifiedWord, { style: Pinyin.STYLE_TONE2 }).map(i => i[0])
 }
 
 const numberChar = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']

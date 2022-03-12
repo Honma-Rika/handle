@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import { answer, dayNo, isDev, isFailed, isFinished, showCheatSheet, showFailed, showHelp, showHint } from '~/state'
-import { hardMode, markStart, meta, tries } from '~/storage'
+import { markStart, meta, tries, useNoHint, useStrictMode } from '~/storage'
 import { t } from '~/i18n'
-import { TRIES_LIMIT, WORD_LENGTH } from '~/logic'
+import { TRIES_LIMIT, WORD_LENGTH, checkValidIdiom, filterNonChineseChars } from '~/logic'
 
 const el = ref<HTMLInputElement>()
 const input = ref('')
 const inputValue = ref('')
+const showToast = autoResetRef(false, 1500)
+const shake = autoResetRef(false, 500)
 
 const isFinishedDelay = debouncedRef(isFinished, 800)
 
-function go() {
+function enter() {
   if (input.value.length !== WORD_LENGTH)
     return
+  if (!checkValidIdiom(input.value, useStrictMode.value)) {
+    showToast.value = true
+    shake.value = true
+    return false
+  }
+  if (meta.value.strict == null)
+    meta.value.strict = useStrictMode.value
   tries.value.push(input.value)
   input.value = ''
   inputValue.value = ''
@@ -25,10 +34,7 @@ function reset() {
 }
 function handleInput(e: Event) {
   const el = (e.target! as HTMLInputElement)
-  input.value = Array.from(el.value)
-    .filter(i => /\p{Script=Han}/u.test(i))
-    .slice(0, 4)
-    .join('')
+  input.value = filterNonChineseChars(el.value)
   markStart()
 }
 function focus() {
@@ -73,7 +79,13 @@ watchEffect(() => {
         </div>
       </template>
 
-      <WordBlocks v-if="!isFinished" :word="input" :active="true" @click="focus()" />
+      <WordBlocks
+        v-if="!isFinished"
+        :class="{ shake }"
+        :word="input"
+        :active="true"
+        @click="focus()"
+      />
 
       <div mt-1 />
 
@@ -91,14 +103,15 @@ watchEffect(() => {
             text="center"
             bg="transparent"
             :disabled="isFinished"
+            :class="{ shake }"
             @input="handleInput"
-            @keydown.enter="go"
+            @keydown.enter="enter"
           >
           <button
             mt3
             btn p="x6 y2"
             :disabled="input.length !== WORD_LENGTH"
-            @click="go"
+            @click="enter"
           >
             {{ t('ok-spaced') }}
           </button>
@@ -110,7 +123,7 @@ watchEffect(() => {
           </button>
 
           <div flex="~ center" mt4 :class="isFinished ? 'op0! pointer-events-none' : ''">
-            <button v-if="!hardMode" mx2 icon-btn text-base pb2 gap-1 flex="~ center" @click="hint()">
+            <button v-if="!useNoHint" mx2 icon-btn text-base pb2 gap-1 flex="~ center" @click="hint()">
               <div i-carbon-idea /> {{ t('hint') }}
             </button>
             <button mx2 icon-btn text-base pb2 gap-1 flex="~ center" @click="sheet()">
@@ -119,7 +132,7 @@ watchEffect(() => {
           </div>
         </div>
       </Transition>
-      <Transition name="fade">
+      <Transition name="fade-in">
         <div v-if="isFinishedDelay && isFinished">
           <ResultFooter />
           <Countdown />
@@ -153,20 +166,12 @@ watchEffect(() => {
         </div>
       </template>
     </div>
+    <Toast v-model="showToast">
+      <div bg-base border border-base px8 py4 m5 text-lg shadow font-serif>
+        <span tracking-1 pl1>
+          {{ t('invalid-idiom') }}
+        </span>
+      </div>
+    </Toast>
   </div>
 </template>
-
-<style>
-.fade-enter-active {
-  transition: all 1s ease;
-}
-.fade-out-leave-active {
-  transition: all 0.5s ease;
-}
-
-.fade-out-leave-to,
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(10px);
-}
-</style>

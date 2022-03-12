@@ -42,6 +42,7 @@
  */
 
 import { seedShuffle } from './utils'
+import { checkValidIdiom } from '~/logic'
 
 export const self_defined_word = '心有灵犀'
 
@@ -127,11 +128,45 @@ export const _2022_MARCH = prepare(31, seedShuffle([
   ['愤世嫉俗', '世'],
 ], '2022-03'))
 
+export const _2022_APRIL = prepare(30, seedShuffle([
+  ['破釜沈舟', '破'],
+  ['急转直下', '下'],
+  ['独具匠心', '心'],
+  ['不耻下问', '下'],
+  ['声名鹊起', '名'],
+  ['适得其反', '其'],
+  ['精益求精', '精'],
+  ['无往不利', '不'],
+  ['百口莫辩', '口'],
+  ['与世无争', '无'],
+  ['返老还童', '老'],
+  ['火上浇油', '上'],
+  ['志在千里', '千'],
+  ['闲情逸致', '情'],
+  ['敬而远之', '而'],
+  ['众目睽睽', '目'],
+  ['蝇头小利', '小'],
+  ['义结金兰', '金'],
+  ['猴年马月', '年'],
+  ['排山倒海', '山'],
+  ['拾金不昧', '金'],
+  ['喜出望外', '出'],
+  ['鸡犬不宁', '不'],
+  ['身临其境', '其'],
+  ['同归于尽', '于'],
+  ['杯水车薪', '车'],
+  ['日新月异', '日'],
+  ['未雨绸缪', '雨'],
+  ['居安思危', '安'],
+  ['百里挑一', '百'], // D100
+], '2022-04'))
+
 export const answers: string[][] = [
   ..._PRE,
   ..._2022_JAN,
   ..._2022_FEB,
   ..._2022_MARCH,
+  ..._2022_APRIL,
 ]
 
 // duplicated check
@@ -144,5 +179,9 @@ if (import.meta.hot) {
       map.set(a[0], i)
     else
       throw new Error(`Word ${a[0]} is duplicated at ${map.get(a[0])}`)
+    if (a[1] && !a[0].includes(a[1]))
+      throw new Error(`Hint ${a[1]} is not included in ${a[0]}`)
+    if (!checkValidIdiom(a[0], true))
+      throw new Error(`${a[0]} is not a valid idiom`)
   })
 }
