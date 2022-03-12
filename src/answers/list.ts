@@ -43,6 +43,8 @@
 
 import { seedShuffle } from './utils'
 
+export const self_defined_word = '心有灵犀'
+
 function prepare<T>(len: number, arr: T[]) {
   if (arr.length !== len)
     throw new Error(`expect array length ${arr.length} to be ${len}`)
