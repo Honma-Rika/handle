@@ -6,6 +6,8 @@ A Chinese Hanzi variation of [Wordle](https://www.powerlanguage.co.uk/wordle/). 
 
 [honma-rika.github.io/handle](https://honma-rika.github.io/handle/)
 
+为方便一天之内多次解不同谜题，在第一次解谜成功后请使用**匿名（InPrivate）窗口**输入url进行后续解谜
+
 ## Development Setup
 
 - Insall [Node.js](https://nodejs.org/en/) >=v16 and [yarn](https://yarnpkg.com/)
