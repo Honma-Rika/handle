@@ -38,11 +38,16 @@ function congrats() {
       origin: { x: 1 },
     })
   }, 400)
+  setTimeout(() => {
+    alert('.. .-.. --- ...- . -.-- --- ..- ')
+  },1000)
+  
 }
 
 watch(isPassed, (v) => {
-  if (v)
+  if (v) {
     setTimeout(congrats, 300)
+  }
 }, { flush: 'post' })
 </script>
 
