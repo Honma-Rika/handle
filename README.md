@@ -1,18 +1,28 @@
 ![](./public/og.png)
 
-# 汉兜 Handle
+# 汉兜 Handle（Honma-Rika魔改版）
 
 A Chinese Hanzi variation of [Wordle](https://www.powerlanguage.co.uk/wordle/). 汉字 Wordle.
 
-[handle.antfu.me](https://handle.antfu.me)
-
-请勿剧透！PLEASE DO NOT SPOIL
+[honma-rika.github.io/handle](https://honma-rika.github.io/handle/)
 
 ## Development Setup
 
-- Insall [Node.js](https://nodejs.org/en/) >=v16 and [pnpm](https://pnpm.io/)
-- Run `pnpm install`
-- Run `pnpm dev` and visit `http://localhost:4444`
+- Insall [Node.js](https://nodejs.org/en/) >=v16 and [yarn](https://yarnpkg.com/)
+- Run `yarn install`
+- Run `yarn build`
+- Run `yarn preview` and visit `http://localhost:3370`
+
+## 自定义谜题
+
+***请勿剧透！PLEASE DO NOT SPOIL!***
+
+- [honma-rika.github.io/handle/?date=1](honma-rika.github.io/handle/?date=1) 仍可畅玩每天变换的不同谜题（谜底暂时仍与原项目一致）
+- [honma-rika.github.io/handle/?word={自定义汉字四字词语}](honma-rika.github.io/handle/?word=钟灵毓秀) 自行替换 *{自定义汉字四字词语}* 即可简单自定义谜题，但由于谜底明文暴露在url中，不太适合与他人分享
+
+    例：[honma-rika.github.io/handle/?word=钟灵毓秀](honma-rika.github.io/handle/?word=钟灵毓秀)
+
+- 将项目clone下来后自行修改 `./src/answers/list.ts` 中的 `self_defined_word` 变量，再执行 `yarn build` 与 `yarn preview` 两步操作，最后访问 `http://localhost:3370`
 
 ## 成语勘误
 
