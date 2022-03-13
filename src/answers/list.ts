@@ -44,7 +44,7 @@
 import { seedShuffle } from './utils'
 import { checkValidIdiom } from '~/logic'
 
-export const self_defined_word = '心有灵犀'
+export const self_defined_word = '中单光一'// '心有灵犀'
 
 function prepare<T>(len: number, arr: T[]) {
   if (arr.length !== len)
