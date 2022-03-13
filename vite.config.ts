@@ -15,7 +15,7 @@ export default defineConfig({
       '~/': `${path.resolve(__dirname, 'src')}/`,
     },
   },
-  base: 'https://honma-rika.github.io/handle/',
+  base: '/handle/', // 'https://honma-rika.github.io/handle/',
   plugins: [
     Vue(),
     AutoImport({
